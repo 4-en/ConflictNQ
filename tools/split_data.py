@@ -2,6 +2,7 @@
 
 import os
 import json
+import random
 
 SOURCE_FILE = '../raw_data/conflict_nq.jsonl'
 OUTPUT_DIR = '../dataset/'
@@ -11,6 +12,11 @@ def split_data(source_file, train_file, val_file, test_file, train_ratio=0.8, va
         lines = f.readlines()
     
     lines = [line for line in lines if line.strip()]  # Remove empty lines
+    
+    # shuffle lines
+    random.seed(42)
+    random.shuffle(lines)
+    
     total_lines = len(lines)
     train_end = int(total_lines * train_ratio)
     val_end = train_end + int(total_lines * val_ratio)
@@ -33,13 +39,17 @@ def split_data(source_file, train_file, val_file, test_file, train_ratio=0.8, va
                 
     # write stats in table in md file
     with open(os.path.join(OUTPUT_DIR, 'README.md'), 'w') as f:
-        f.write(f"# Dataset Split\n\n")
+        
+        f.write(f"# ConflictNQ Dataset\n\n")
+        f.write(f"ConflictNQ is a dataset of questions and answers designed to test the ability of models to handle conflicting information. Each entry contains a question, a real answer, a fabricated false answer, and supporting passages for both answers.\n\n")
+        
+        f.write(f"## Dataset Split\n\n")
         f.write(f"| Split | File | Number of Samples | Percentage |\n")
         f.write(f"|-------|------|-------------------|------------|\n")
         f.write(f"| Total | {source_file} | {total_lines} | 100% |\n")
         f.write(f"| Train | {train_file} | {train_len} | {train_len / total_lines:.2%} |\n")
         f.write(f"| Val   | {val_file} | {val_len} | {val_len / total_lines:.2%} |\n")
-        f.write(f"| Test  | {test_file} | {test_len} | {test_len / total_lines:.2%} |\n\n\n")
+        f.write(f"| Test  | {test_file} | {test_len} | {test_len / total_lines:.2%} |\n\n")
         
         # schema of the dataset
         f.write(f"## Dataset Schema\n\n")
@@ -56,7 +66,7 @@ def split_data(source_file, train_file, val_file, test_file, train_ratio=0.8, va
         f.write(f"| fake_short_answer | string | A short answer to the fabricated question, containing only the information explicitly asked for |\n")
         f.write(f"| fake_passages | list of Passage | A list of passages supporting the fake answer, each with a summary and the passage text |\n\n")
         
-        f.write(f"Passage Schema:\n\n")
+        f.write(f"## Passage Schema:\n\n")
         f.write(f"| Field | Type | Description |\n")
         f.write(f"|-------|------|-------------|\n")
         f.write(f"| summary | string | A short one-line summary or title of the passage |\n")
