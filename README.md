@@ -8,6 +8,8 @@ Modern LLMs are often 'too smart' for their own good. When a retrieved document 
 
 **ConflictNQ** isolates this behavior to test if your RAG pipeline is truly **grounded** or just **hallucinating based on prior knowledge.**
 
+Based on **CLAP NQ**, this dataset pairs real questions and answers from the Natural Questions corpus with synthetically generated "alternative facts" that directly contradict the original answers. The dataset only includes entries with an answer in the original dataset.
+
 ---
 
 ## Key Features
