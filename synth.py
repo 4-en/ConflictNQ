@@ -53,7 +53,7 @@ def get_entities(generator: np.random.Generator) -> list[str]:
 
     
 
-OUTPUT_FILE = "output/synth_nq.jsonl"
+OUTPUT_FILE = "output/conflict_nq.jsonl"
 TARGET_SIZE = 0
 
 def get_parser():

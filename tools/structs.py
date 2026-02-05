@@ -1,41 +1,29 @@
 from pydantic import BaseModel
-from enum import Enum
 
 class FicticiousPassage(BaseModel):
     summary: str
     passage: str
     
 class FicticiousEntry(BaseModel):
-    new_question: str
+    cleaned_question: str
+    real_short_answer: str
     new_answer: str
     new_short_answer: str
     answer_contexts: list[FicticiousPassage]
-    false_short_answers: list[str]
     generation_review: str
-    contained_contradictions: bool
+    issues_found: bool
     
-class SynthNQEntry(BaseModel):
+class Passage(BaseModel):
+    passage: str
+    summary: str
+    
+class ConflictNQEntry(BaseModel):
     id: str
     question: str
-    answer: str
-    short_answer: str
-    passages: list[FicticiousPassage]
-    false_answers: list[str]
-    
-class QuestionType(str, Enum):
-    HISTORY = "HISTORY"
-    GEOGRAPHY = "GEOGRAPHY"
-    SCIENCE = "SCIENCE"
-    TECHNOLOGY = "TECHNOLOGY"
-    ENTERTAINMENT = "ENTERTAINMENT"
-    SPORTS = "SPORTS"
-    POP_CULTURE = "POP_CULTURE"
-    FICTION = "FICTION"
-    BIOLOGY = "BIOLOGY"
-    ANCIENT_HISTORY = "ANCIENT_HISTORY"
-    RECENT_HISTORY = "RECENT_HISTORY"
-    POLITICS = "POLITICS"
-    ART = "ART"
-    MUSIC = "MUSIC"
-    LITERATURE = "LITERATURE"
-    FILM = "FILM"
+    cleaned_question: str
+    real_answer: str
+    real_short_answer: str
+    real_passages: list[Passage]
+    fake_answer: str
+    fake_short_answer: str
+    fake_passages: list[Passage]
