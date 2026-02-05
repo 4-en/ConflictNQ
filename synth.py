@@ -68,6 +68,7 @@ def get_parser():
     parser.add_argument("--buffer_size", type=int, default=100, help="Number of entries to buffer before writing to disk.")
     parser.add_argument("--cost_input", type=float, default=0.5, help="Cost per 1M input tokens.")
     parser.add_argument("--cost_output", type=float, default=3.0, help="Cost per 1M output tokens.")
+    parser.add_argument("--start_index", type=int, default=0, help="Index in source dataset to start from.")
     
     return parser
 
@@ -80,7 +81,7 @@ class Synthesizer:
         self.source_data = [item for item in dataset['train']]
         self.source_data+= [item for item in dataset['validation']]
         
-        self.start_index = 0
+        self.start_index = args.start_index % len(self.source_data)
             
         self.output_file = args.output_file
         self.target_size = args.target_size
@@ -93,6 +94,9 @@ class Synthesizer:
         
         self.generations_started_count = 0
         self.max_generations = self.target_size if self.target_size > 0 else len(self.source_data)
+        
+        if self.max_generations > len(self.source_data) - self.start_index:
+            self.max_generations = len(self.source_data) - self.start_index
         
         self.condition = Condition()
         self._threads = []
@@ -107,10 +111,11 @@ class Synthesizer:
             'total_input_tokens': 0,
             'total_output_tokens': 0,
             'failed_generations': 0,
-            'contradiction_skips': 0
+            'contradiction_skips': 0,
+            'incomplete_source_skips': 0
         }
         
-    def report_stats(self, input_tokens: int, output_tokens: int, failed: bool, contradiction_skip: bool):
+    def report_stats(self, input_tokens: int, output_tokens: int, failed: bool, contradiction_skip: bool, incomplete_source: bool=False):
         with self.stats_lock:
             self.stats['total_input_tokens'] += input_tokens
             self.stats['total_output_tokens'] += output_tokens
@@ -118,6 +123,8 @@ class Synthesizer:
                 self.stats['failed_generations'] += 1
             if contradiction_skip:
                 self.stats['contradiction_skips'] += 1
+            if incomplete_source:
+                self.stats['incomplete_source_skips'] += 1
         
     def get_next_item(self):
         with self.condition:
@@ -181,7 +188,7 @@ class Synthesizer:
             response_schema=FicticiousEntry,
             temperature=self.temp,
             system_instruction=instruction.strip(),
-            seed=self.seed + generator.integers(1, 1_000_000_000) # use generator for seed so multiple attempts at same entry will have different seeds
+            seed=int(self.seed + generator.integers(1, 1_000_000_000)) % (2**31) # use generator for seed so multiple attempts at same entry will have different seeds
         )
         
         return contents, config
@@ -221,6 +228,7 @@ class Synthesizer:
                 input_answer = item['output'][0].get('answer', '').strip()
             if input_question == "" or input_answer == "":
                 # skip this item
+                self.report_stats(0, 0, failed=False, contradiction_skip=False, incomplete_source=True)
                 continue
             
             passages = []
@@ -345,14 +353,16 @@ class Synthesizer:
                         output_tokens = 0
                         failed_count = 0
                         contradiction_skips = 0
+                        incomplete_source_skips = 0
                         with self.stats_lock:
                             input_tokens = self.stats['total_input_tokens']
                             output_tokens = self.stats['total_output_tokens']
                             failed_count = self.stats['failed_generations']
                             contradiction_skips = self.stats['contradiction_skips']
+                            incomplete_source_skips = self.stats['incomplete_source_skips']
                             
                         estimated_cost = (input_tokens / 1_000_000) * self.cost_input + (output_tokens / 1_000_000) * self.cost_output
-                        print(f"Generated {true_count} / {self.max_generations} entries. Total input tokens: {input_tokens}, Total output tokens: {output_tokens}, Failed: {failed_count}, Skips: {contradiction_skips}, Estimated cost: ${estimated_cost:.4f}", end="\r")
+                        print(f"Generated {true_count} / {self.max_generations} entries. Total input tokens: {input_tokens}, Total output tokens: {output_tokens}, Failed: {failed_count}, Skips (Gen): {contradiction_skips}, Skips (Source): {incomplete_source_skips}, Estimated cost: ${estimated_cost:.4f}", end="\r")
                         
                         #print(f"Generated {true_count} / {self.max_generations} entries. Buffered entries: {len(self._buffer)}", end="\r")
                         

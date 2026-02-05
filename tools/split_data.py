@@ -7,6 +7,8 @@ import random
 SOURCE_FILE = '../raw_data/conflict_nq.jsonl'
 OUTPUT_DIR = '../dataset/'
 
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
 def split_data(source_file, train_file, val_file, test_file, train_ratio=0.8, val_ratio=0.1):
     with open(source_file, 'r') as f:
         lines = f.readlines()
