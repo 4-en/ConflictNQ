@@ -26,13 +26,14 @@ ConflictNQ provides a rich set of fields to enable complex evaluation:
 | Field | Description |
 | --- | --- |
 | `id` | A unique identifier. |
-| `question` | The original real-world query from Natural Questions (NQ). |
-| `real_answer` | The factually correct answer based on real-world data. |
-| `real_short_answer` | The factually correct short answer based on real-world data. |
+| `question` | The original real-world query from CLAP NQ. |
+| `cleaned_question` | A cleaned version of the original question with correct grammar, spelling and punctuation. |
+| `real_answer` | The factually correct answer from CLAP NQ. |
+| `real_short_answer` | The factually correct short answer generated from the full answer.  |
+| `real_passages` | The original passages from CLAP NQ. |
 | `fake_answer` | The synthesized alternative answer the model *should* provide. |
 | `fake_short_answer` | The synthesized alternative short answer the model *should* provide. |
-| `fake_passages` | 5 synthetically generated passages supporting the `fake_answer`. |
-| `real_passages` | The original passages from ClapNQ. |
+| `fake_passages` | Up to 5 synthetically generated passages supporting the `fake_answer`. |
 
 ### Example
 
@@ -53,5 +54,5 @@ When using ConflictNQ, we recommend measuring:
 
 ## Attribution
 
-Derived from [ClapNQ](https://github.com/primeqa/clapnq) and the [Natural Questions](https://ai.google.com/research/NaturalQuestions) corpus.
+Derived from [CLAP NQ](https://github.com/primeqa/clapnq) and the [Natural Questions](https://ai.google.com/research/NaturalQuestions) corpus.
 
