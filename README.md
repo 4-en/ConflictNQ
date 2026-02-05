@@ -23,17 +23,23 @@ Modern LLMs are often 'too smart' for their own good. When a retrieved document 
 
 ConflictNQ provides a rich set of fields to enable complex evaluation:
 
-| Field | Description |
-| --- | --- |
-| `id` | A unique identifier. |
-| `question` | The original real-world query from CLAP NQ. |
-| `cleaned_question` | A cleaned version of the original question with correct grammar, spelling and punctuation. |
-| `real_answer` | The factually correct answer from CLAP NQ. |
-| `real_short_answer` | The factually correct short answer generated from the full answer.  |
-| `real_passages` | The original passages from CLAP NQ. |
-| `fake_answer` | The synthesized alternative answer the model *should* provide. |
-| `fake_short_answer` | The synthesized alternative short answer the model *should* provide. |
-| `fake_passages` | Up to 5 synthetically generated passages supporting the `fake_answer`. |
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | string | A unique identifier. |
+| `question` | string | The original real-world query from CLAP NQ. |
+| `cleaned_question` | string | A cleaned version of the original question with correct grammar, spelling and punctuation. |
+| `real_answer` | string | The factually correct answer from CLAP NQ. |
+| `real_short_answer` | string | The factually correct short answer generated from the full answer.  |
+| `real_passages` | list[Passage] | The original passages from CLAP NQ. |
+| `fake_answer` | string | The synthesized alternative answer the model *should* provide. |
+| `fake_short_answer` | string | The synthesized alternative short answer the model *should* provide. |
+| `fake_passages` | list[Passage] | Up to 5 synthetically generated passages supporting the `fake_answer`. |
+
+Passage Schema:
+| Field | Type | Description |
+| --- | --- | --- |
+| `passage` | string | The text of the passage. |
+| `summary` | string | A brief summary or title of the passage. |
 
 ### Example
 
